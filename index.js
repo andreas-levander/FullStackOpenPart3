@@ -54,7 +54,33 @@ app.delete('/api/persons/:id', (request, response) => {
     contacts = contacts.filter(contact => contact.id !== id)
   
     response.status(204).end()
-  })
+})
+
+app.post('/api/persons', (request, response) => {
+    const body = request.body
+    console.log(body)
+  
+    
+    if (!body.number || !body.name) {
+        return response.status(400).json({ 
+          error: 'name or number missing' 
+        })
+    } else if (contacts.find(person => person.name === body.name) !== undefined) {
+        return response.status(400).json({ 
+          error: 'name already exists in contacts' 
+        })
+    }
+  
+    const contact = {
+      id: Math.floor(Math.random() * 1000000),
+      name: body.name,
+      number: body.number
+    }
+  
+    contacts = contacts.concat(contact)
+  
+    response.json(contact)
+})
 
 
 
