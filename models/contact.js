@@ -13,8 +13,31 @@ mongoose.connect(url)
   })
 
 const contactSchema = new mongoose.Schema({
-    name: String,
-    number: String,
+    name: {
+      type: String,
+      minlength: 3,
+      unique: true
+    },
+    number: {
+      type: String,
+      
+      validate: {
+        validator: function(numberString) {
+          const numberArray = numberString.split("-")
+
+          if (numberArray.length !== 2) return false
+
+          const firstNum = numberArray[0]
+          const secondNum = numberArray[1]
+
+          if(firstNum.length > 3 || firstNum.length < 2) return false
+        
+          return (!isNaN(firstNum) && !isNaN(secondNum)) 
+        },
+        message: "is not a phonenumber"
+      },
+      minlength: 8,
+    },
 })
 
 contactSchema.set('toJSON', {

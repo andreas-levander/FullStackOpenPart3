@@ -85,8 +85,11 @@ app.put('/api/persons/:id', (request, response, next) => {
         name: body.name,
         number: body.number
     }
+
+    const opts = { runValidators: true, new: true };
+
     Contact
-        .findByIdAndUpdate(request.params.id, contact, {new: true})
+        .findByIdAndUpdate(request.params.id, contact, opts)
         .then(updatedContact => {
             response.json(updatedContact)
           })
@@ -98,7 +101,11 @@ const errorHandler = (error, request, response, next) => {
   
     if (error.name === 'CastError') {
       return response.status(400).send({ error: 'malformatted id' })
-    } 
+    } else if (error.name === 'ValidationError') {
+        return response.status(400).json({ error: error.message })
+    } else if (error.name === 'MongoServerError') {
+        return response.status(400).json({ error: error.message })
+    }
   
     next(error)
  }
