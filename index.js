@@ -15,19 +15,24 @@ morgan.token('body', function(req, res) {
   if (Object.keys(req.body).length > 0) return JSON.stringify(req.body);
   return ' ';
 });
+
 app.use(morgan(`:method :url :status :res[content-length] - 
                 :response-time ms :body`));
 
 app.get('/info', (request, response, next) => {
-  Contact.count().then((size) => {
-    const time = new Date();
-    response.send(`<p>phonebook has info for ${size} people</p><p>${time}</p>`);
-  })
+  Contact
+      .count()
+      .then((size) => {
+        const time = new Date();
+        response.send(`<p>phonebook has info for ${size} people</p>
+                       <p>${time}</p>`);
+      })
       .catch((error) => next(error));
 });
 
 app.get('/api/persons/:id', (request, response, next) => {
-  Contact.findById(request.params.id)
+  Contact
+      .findById(request.params.id)
       .then((contact) => {
         if (contact) {
           response.json(contact);
@@ -48,7 +53,8 @@ app.get('/api/persons', (request, response, next) => {
 });
 
 app.delete('/api/persons/:id', (request, response, next) => {
-  Contact.findByIdAndRemove(request.params.id)
+  Contact
+      .findByIdAndRemove(request.params.id)
       .then((result) => {
         response.status(204).end();
       })
