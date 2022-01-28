@@ -6,8 +6,6 @@ const Contact = require('./models/contact')
 const { findByIdAndUpdate } = require('./models/contact')
 
 
-
-
 const app = express()
 
 app.use(cors())
@@ -21,12 +19,12 @@ morgan.token('body', function (req, res) {
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
     
 
-app.get('/info', (request, response) => {
+app.get('/info', (request, response, next) => {
     Contact.count().then(size => {
         const time = new Date()
         response.send(`<p>phonebook has info for ${size} people</p><p>${time}</p>`)
     })
-    
+    .catch(error => next(error))
 })
 
 app.get('/api/persons/:id', (request, response, next) => {
@@ -41,12 +39,13 @@ app.get('/api/persons/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
-app.get('/api/persons', (request, response) => {
+app.get('/api/persons', (request, response, next) => {
     Contact
         .find({})
         .then(contacts => {
             response.json(contacts)
     })
+    .catch(error => next(error))
 })
 
 app.delete('/api/persons/:id', (request, response, next) => {
@@ -57,7 +56,7 @@ app.delete('/api/persons/:id', (request, response, next) => {
         .catch(error => next(error))
 })
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
     const body = request.body
     //console.log(body)
   
@@ -76,6 +75,7 @@ app.post('/api/persons', (request, response) => {
     contact.save().then(savedContact => {
         response.json(savedContact)
     })
+    .catch(error => next(error))
 })
 
 app.put('/api/persons/:id', (request, response, next) => {
@@ -105,8 +105,6 @@ const errorHandler = (error, request, response, next) => {
   
 // this has to be the last loaded middleware.
 app.use(errorHandler)
-
-
 
 
 const PORT = process.env.PORT || 3001
