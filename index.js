@@ -1,6 +1,9 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
+const Contact = require('./models/contact')
+
 
 
 
@@ -58,7 +61,11 @@ app.get('/api/persons/:id', (request, response) => {
 })
 
 app.get('/api/persons', (request, response) => {
-    response.json(contacts)
+    Contact
+        .find({})
+        .then(contacts => {
+            response.json(contacts)
+    })
 })
 
 app.delete('/api/persons/:id', (request, response) => {
@@ -77,21 +84,21 @@ app.post('/api/persons', (request, response) => {
         return response.status(400).json({ 
           error: 'name or number missing' 
         })
-    } else if (contacts.find(person => person.name === body.name) !== undefined) {
-        return response.status(400).json({ 
-          error: 'name already exists in contacts' 
-        })
-    }
+    } 
+    // else if (contacts.find(person => person.name === body.name) !== undefined) {
+    //     return response.status(400).json({ 
+    //       error: 'name already exists in contacts' 
+    //     })
+    // }
   
-    const contact = {
-      id: Math.floor(Math.random() * 1000000),
+    const contact = new Contact({
       name: body.name,
       number: body.number
-    }
+    })
   
-    contacts = contacts.concat(contact)
-  
-    response.json(contact)
+    contact.save().then(savedContact => {
+        response.json(savedContact)
+    })
 })
 
 
