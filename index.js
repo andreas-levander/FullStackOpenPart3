@@ -3,6 +3,7 @@ const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
 const Contact = require('./models/contact')
+const { findByIdAndUpdate } = require('./models/contact')
 
 
 
@@ -49,15 +50,16 @@ app.get('/info', (request, response) => {
     response.send(`<p>phonebook has info for ${size} people</p><p>${time}</p>`)
 })
 
-app.get('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    const person = contacts.find(contact => contact.id === id)
-
-    if (person) {
-      response.json(person)
-    } else {
-      response.status(404).end()
-    }
+app.get('/api/persons/:id', (request, response, next) => {
+    Contact.findById(request.params.id)
+    .then(contact => {
+      if (contact) {
+        response.json(contact)
+      } else {
+        response.status(404).end() 
+      }
+    })
+    .catch(error => next(error))
 })
 
 app.get('/api/persons', (request, response) => {
@@ -68,11 +70,12 @@ app.get('/api/persons', (request, response) => {
     })
 })
 
-app.delete('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    contacts = contacts.filter(contact => contact.id !== id)
-  
-    response.status(204).end()
+app.delete('/api/persons/:id', (request, response, next) => {
+    Contact.findByIdAndRemove(request.params.id)
+        .then(result => {
+            response.status(204).end()
+        })
+        .catch(error => next(error))
 })
 
 app.post('/api/persons', (request, response) => {
@@ -85,12 +88,7 @@ app.post('/api/persons', (request, response) => {
           error: 'name or number missing' 
         })
     } 
-    // else if (contacts.find(person => person.name === body.name) !== undefined) {
-    //     return response.status(400).json({ 
-    //       error: 'name already exists in contacts' 
-    //     })
-    // }
-  
+   
     const contact = new Contact({
       name: body.name,
       number: body.number
@@ -100,6 +98,34 @@ app.post('/api/persons', (request, response) => {
         response.json(savedContact)
     })
 })
+
+app.put('/api/persons/:id', (request, response, next) => {
+    const body = request.body
+
+    const contact = {
+        name: body.name,
+        number: body.number
+    }
+    Contact
+        .findByIdAndUpdate(request.params.id, contact, {new: true})
+        .then(updatedContact => {
+            response.json(updatedContact)
+          })
+        .catch(error => next(error))
+})
+
+const errorHandler = (error, request, response, next) => {
+    console.error(error.message)
+  
+    if (error.name === 'CastError') {
+      return response.status(400).send({ error: 'malformatted id' })
+    } 
+  
+    next(error)
+ }
+  
+// this has to be the last loaded middleware.
+app.use(errorHandler)
 
 
 
