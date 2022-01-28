@@ -1,51 +1,51 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
-const url = process.env.MONGODB_URI
+const url = process.env.MONGODB_URI;
 
-console.log('connecting to', url)
+console.log('connecting to', url);
 
 mongoose.connect(url)
-  .then(result => {
-    console.log('connected to MongoDB')
-  })
-  .catch((error) => {
-    console.log('error connecting to MongoDB:', error.message)
-  })
+    .then((result) => {
+      console.log('connected to MongoDB');
+    })
+    .catch((error) => {
+      console.log('error connecting to MongoDB:', error.message);
+    });
 
 const contactSchema = new mongoose.Schema({
-    name: {
-      type: String,
-      minlength: 3,
-      unique: true
-    },
-    number: {
-      type: String,
-      
-      validate: {
-        validator: function(numberString) {
-          const numberArray = numberString.split("-")
+  name: {
+    type: String,
+    minlength: 3,
+    unique: true,
+  },
+  number: {
+    type: String,
 
-          if (numberArray.length !== 2) return false
+    validate: {
+      validator: function(numberString) {
+        const numberArray = numberString.split('-');
 
-          const firstNum = numberArray[0]
-          const secondNum = numberArray[1]
+        if (numberArray.length !== 2) return false;
 
-          if(firstNum.length > 3 || firstNum.length < 2) return false
-        
-          return (!isNaN(firstNum) && !isNaN(secondNum)) 
-        },
-        message: "is not a phonenumber"
+        const firstNum = numberArray[0];
+        const secondNum = numberArray[1];
+
+        if (firstNum.length > 3 || firstNum.length < 2) return false;
+
+        return (!isNaN(firstNum) && !isNaN(secondNum));
       },
-      minlength: 8,
+      message: 'is not a phonenumber',
     },
-})
+    minlength: 8,
+  },
+});
 
 contactSchema.set('toJSON', {
   transform: (document, returnedObject) => {
-    returnedObject.id = returnedObject._id.toString()
-    delete returnedObject._id
-    delete returnedObject.__v
-  }
-})
+    returnedObject.id = returnedObject._id.toString();
+    delete returnedObject._id;
+    delete returnedObject.__v;
+  },
+});
 
-module.exports = mongoose.model('Contact', contactSchema)
+module.exports = mongoose.model('Contact', contactSchema);
