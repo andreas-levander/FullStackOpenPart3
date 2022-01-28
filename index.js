@@ -21,33 +21,12 @@ morgan.token('body', function (req, res) {
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
     
 
-let contacts = [
-    { 
-        "id": 1,
-        "name": "Arto Hellas", 
-        "number": "040-123456"
-      },
-      { 
-        "id": 2,
-        "name": "Ada Lovelace", 
-        "number": "39-44-5323523"
-      },
-      { 
-        "id": 3,
-        "name": "Dan Abramov", 
-        "number": "12-43-234345"
-      },
-      { 
-        "id": 4,
-        "name": "Mary Poppendieck", 
-        "number": "39-23-6423122"
-      }
-]
-
 app.get('/info', (request, response) => {
-    const size = contacts.length
-    const time = new Date()
-    response.send(`<p>phonebook has info for ${size} people</p><p>${time}</p>`)
+    Contact.count().then(size => {
+        const time = new Date()
+        response.send(`<p>phonebook has info for ${size} people</p><p>${time}</p>`)
+    })
+    
 })
 
 app.get('/api/persons/:id', (request, response, next) => {
